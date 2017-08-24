@@ -1,9 +1,10 @@
-from scipy.io import wavfile
+from scikits.audiolab import wavread, wavwrite
 
-#audio we are going to test
-filename = "audios/Für Elise (original).wav"
+data2, fs2, enc2 = wavread("audios/noise.waf")
+data1, fs1, enc1 = wavread("audios/Fur Elise (original).wav")
 
-#can we read it?
-fs, data = wavfile.read(filename)
-
-assert (fs == 44100)
+#here we just mix up the original wave and the noise
+assert fs1 == fs2
+assert enc1 == enc2
+result = 1 * data1.T[0] + 1 * data2
+wavwrite(result, 'result.wav', fs=44100)

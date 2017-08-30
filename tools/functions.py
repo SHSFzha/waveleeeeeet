@@ -15,9 +15,9 @@ def noiseMixer(outputSnr):
     if outputSnr == 10:
         noisyArray = 0.015 * data2
     elif outputSnr == 0:
-        noisyArray = 0.15 * data2
-    elif outputSnr == -10:
         noisyArray = 0.0475 * data2
+    elif outputSnr == -10:
+        noisyArray = 0.15 * data2
     else:
         raise ValueError('Unexpected value passed')
 
@@ -33,8 +33,14 @@ def snrCalculation(original, noise):
         avgPower1 += i ** 2
     for i in noise:
         avgPower2 += i ** 2
-    snr = 10 * np.log10(avgPower1 / len(original) / (avgPower2 / len(noise)))
 
-    return snr
+    return 10 * np.log10(avgPower1 / len(original) / (avgPower2 / len(noise)))
+
+def butterWorth():
+    pass
+
+def wavelet():
+    pass
+
 
 

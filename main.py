@@ -1,4 +1,4 @@
-from tools import functions
+from tools import functions as fn
 
-originalArray, noisyArray = functions.noiseMixer(0)
-print "snr estimado: " + str(functions.snrCalculation(originalArray, noisyArray)) + " db"
+originalArray, noisyArray = fn.noiseMixer(10)
+print "snr estimado: " + str(fn.snrCalculation(originalArray, noisyArray)) + " Db"

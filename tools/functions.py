@@ -1,11 +1,12 @@
 import numpy as np
 from scikits.audiolab import wavread, wavwrite
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, filtfilt
 
-def noiseMixer(outputSnr):
+
+def noisemixer(outputSnr):
     # both tracks must have same encoding and sampling frequency
-    data2, fs2, enc2 = wavread("audios/noise.waf")
-    data1, fs1, enc1 = wavread("audios/Fur Elise (original).wav")
+    data2, fs2, enc2 = wavread('audios/noise.waf')
+    data1, fs1, enc1 = wavread('audios/Fur Elise (original).wav')
     assert fs1 == fs2
     assert enc1 == enc2
 
@@ -27,7 +28,8 @@ def noiseMixer(outputSnr):
 
     return originalArray, noisyArray, fs1
 
-def snrCalculation(original, noise):
+
+def snrcalculation(original, noise):
     avgPower1 = 0
     avgPower2 = 0
     for i in original:
@@ -37,22 +39,28 @@ def snrCalculation(original, noise):
 
     return 10 * np.log10(avgPower1 / len(original) / (avgPower2 / len(noise)))
 
-def butter_lowpass(cutoff, fs, order=5, ftype="low"):
+
+def butter_lowpass(cutoff, fs, order=5, ftype='low'):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype=ftype, analog=False)
     return b, a
 
+
 def butter_lowpass_filter(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order , ftype="low")
-    y = lfilter(b, a, data)
+    b, a = butter_lowpass(cutoff, fs, order=order , ftype='low')
+    y = filtfilt(b, a, data)
     return y
 
+
+def wavelet_cascade():
+    pass
+
+
 def wavelet(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order, ftype="high")
-    h1 = lfilter(b, a, data)
-    b, a = butter_lowpass(cutoff, fs, order=order, ftype="low")
-    l1 = lfilter(b, a, data)
+    b, a = butter_lowpass(cutoff, fs, order=order, ftype='high')
+    h1 = filtfilt(b, a, data)
+    b, a = butter_lowpass(cutoff, fs, order=order, ftype='low')
+    l1 = filtfilt(b, a, data)
 
     return h1 + l1
-

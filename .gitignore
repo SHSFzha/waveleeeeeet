@@ -99,5 +99,7 @@ ENV/
 
 # mypy
 .mypy_cache/
-/result.wav
 .idea/
+/result.wav
+/wavelet_filtered.wav
+/butterworth_lowpass.wav

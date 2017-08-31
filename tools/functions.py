@@ -1,5 +1,6 @@
 import numpy as np
 from scikits.audiolab import wavread, wavwrite
+from scipy.signal import butter, lfilter
 
 def noiseMixer(outputSnr):
     # both tracks must have same encoding and sampling frequency
@@ -24,7 +25,7 @@ def noiseMixer(outputSnr):
     result = originalArray + noisyArray
     wavwrite(result, 'result.wav', fs=fs1)
 
-    return originalArray, noisyArray
+    return originalArray, noisyArray, fs1
 
 def snrCalculation(original, noise):
     avgPower1 = 0
@@ -36,11 +37,22 @@ def snrCalculation(original, noise):
 
     return 10 * np.log10(avgPower1 / len(original) / (avgPower2 / len(noise)))
 
-def butterWorth():
-    pass
+def butter_lowpass(cutoff, fs, order=5, ftype="low"):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype=ftype, analog=False)
+    return b, a
 
-def wavelet():
-    pass
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order , ftype="low")
+    y = lfilter(b, a, data)
+    return y
 
+def wavelet(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order, ftype="high")
+    h1 = lfilter(b, a, data)
+    b, a = butter_lowpass(cutoff, fs, order=order, ftype="low")
+    l1 = lfilter(b, a, data)
 
+    return h1 + l1
 

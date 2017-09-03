@@ -58,9 +58,29 @@ def wavelet_cascade():
 
 
 def wavelet(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order, ftype='high')
-    h1 = filtfilt(b, a, data)
-    b, a = butter_lowpass(cutoff, fs, order=order, ftype='low')
-    l1 = filtfilt(b, a, data)
+    # definir filtros
 
-    return h1 + l1
+    # passa altas
+    Hb, Ha = butter_lowpass(cutoff, fs, order=order, ftype='high')
+    # passa baixas
+    Lb, La = butter_lowpass(cutoff, fs, order=order, ftype='low')
+
+    scale = 0
+    iterate = False
+
+    H = filtfilt(Hb, Ha, data)
+    L = filtfilt(Lb, La, data)
+
+    filtered = H
+
+    while iterate:
+        H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0))
+        L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0))
+        scale = scale + 2
+        for i in range(len(data)):
+            if (i%scale == 0):
+                filtered[i] += H[i / scale] * scale
+        if len(L) <= 1:
+            iterate = False
+
+    return filtered

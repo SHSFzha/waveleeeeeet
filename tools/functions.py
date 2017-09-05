@@ -63,23 +63,21 @@ def wavelet(data, cutoff, fs, order=5):
     Lb, La = butter_lowpass(cutoff, fs, order=order, ftype='low')
 
     scale = 0
-    iterate = False
+    iterate = True
 
     H = filtfilt(Hb, Ha, data)
     L = filtfilt(Lb, La, data)
 
-    filtered = threshold(H, np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20)
-    print np.amax(H)
-    print np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20
+    filtered = threshold(L, threshmin=np.sqrt(2 * np.log(len(H)) * np.std(H)) / 200)
     while iterate:
-        H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0))
-        L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0))
+        H = filtfilt(Hb, Ha, np.delete(H, np.s_[::2], 0), padlen=0)
+        L = filtfilt(Lb, La, np.delete(H, np.s_[::2], 0), padlen=0)
 
-        H = threshold(H, np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20)
+        H = threshold(H, threshmin=np.sqrt(2 * np.log(len(H)) * np.std(H)) / 200)
         scale = scale + 2
-        for i in range(len(data)):
+        for i in range(len(H)):
             if (i%scale == 0):
-                filtered[i] += H[i / scale]
+                filtered[i] += L[i / scale]
         if len(L) <= 1:
             iterate = False
 

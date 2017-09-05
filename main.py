@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from numpy import fft
 
 def main():
-    originalArray, noisyArray, fs = fn.noisemixer(0)
+    originalArray, noisyArray, fs = fn.noisemixer(10)
     print 'snr original: ' + str(fn.snrcalculation(originalArray, noisyArray)) + ' Db'
 
     order = 2

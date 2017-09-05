@@ -68,16 +68,17 @@ def wavelet(data, cutoff, fs, order=5):
     H = filtfilt(Hb, Ha, data)
     L = filtfilt(Lb, La, data)
 
-    filtered = threshold(L, threshmin=np.sqrt(2 * np.log(len(H)) * np.std(H)) / 10)
+    filtered = threshold(L, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)), threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)))
 
     while iterate:
-        if len(L) <= 1:
+        padlen = 6 * max(len(Ha), len(Hb), len(La), len(Lb))
+        if len(L) <= padlen:
             return filtered
 
-        H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0), padlen=0)
-        L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0), padlen=0)
+        H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
+        L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
 
-        H = threshold(H, threshmin=np.sqrt(2 * np.log(len(H)) * np.std(H)) / 10)
+        H = threshold(H, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)), threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)))
         scale = scale + 2
         for i in range(len(H)):
             if (i%scale == 0):

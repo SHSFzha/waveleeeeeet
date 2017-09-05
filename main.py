@@ -1,13 +1,11 @@
 from tools import functions as fn
 from scikits.audiolab import wavwrite
-from matplotlib import pyplot as plt
-from numpy import fft
 
 def main():
-    originalArray, noisyArray, fs = fn.noisemixer(-10)
+    originalArray, noisyArray, fs = fn.noisemixer(0)
     print 'snr original: ' + str(fn.snrcalculation(originalArray, noisyArray)) + ' Db'
 
-    order = 2
+    order = 5
     butterworthcutoff = 700  # Hz
     walevetcutoff = 11025
 
@@ -18,10 +16,7 @@ def main():
 
     wv_filtered = fn.wavelet(originalArray + noisyArray, walevetcutoff, fs, order)
     print 'wavelet filtered data snr: ' + str(fn.snrcalculation(originalArray, originalArray - wv_filtered))
-    wavwrite(wv_filtered, 'wavelet_lowpass.wav', fs)
-
-    plt.plot(fft.fft(abs(wv_filtered)))
-    plt.show()
+    wavwrite(wv_filtered, 'wavelet_filtered.wav', fs)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import numpy as np
 from scikits.audiolab import wavread, wavwrite
 from scipy.signal import butter, filtfilt
+from scipy.stats import threshold
 
 
 def noisemixer(outputSnr):
@@ -53,10 +54,6 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     return y
 
 
-def wavelet_cascade():
-    pass
-
-
 def wavelet(data, cutoff, fs, order=5):
     # definir filtros
 
@@ -71,15 +68,18 @@ def wavelet(data, cutoff, fs, order=5):
     H = filtfilt(Hb, Ha, data)
     L = filtfilt(Lb, La, data)
 
-    filtered = H
-
+    filtered = threshold(H, np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20)
+    print np.amax(H)
+    print np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20
     while iterate:
         H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0))
         L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0))
+
+        H = threshold(H, np.sqrt(2 * np.log(len(H)) * np.std(H)) / 20)
         scale = scale + 2
         for i in range(len(data)):
             if (i%scale == 0):
-                filtered[i] += H[i / scale] * scale
+                filtered[i] += H[i / scale]
         if len(L) <= 1:
             iterate = False
 

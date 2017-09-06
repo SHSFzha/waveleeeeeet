@@ -54,7 +54,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     return y
 
 
-def wavelet(data, cutoff, fs, order=5):
+def wavelet_hard(data, cutoff, fs, order=5):
     # definir filtros
 
     # passa altas
@@ -68,8 +68,8 @@ def wavelet(data, cutoff, fs, order=5):
     H = filtfilt(Hb, Ha, data)
     L = filtfilt(Lb, La, data)
 
-    filtered = threshold(L, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)), threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)))
 
+    filtered = threshold(L, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100, threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100)
     while iterate:
         padlen = 6 * max(len(Ha), len(Hb), len(La), len(Lb))
         if len(L) <= padlen:
@@ -78,7 +78,46 @@ def wavelet(data, cutoff, fs, order=5):
         H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
         L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
 
-        H = threshold(H, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)), threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)))
+        H = threshold(H, threshmin=- np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100, threshmax= np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100)
+        scale = scale + 2
+        for i in range(len(H)):
+            if (i%scale == 0):
+                filtered[i] += H[i / scale]
+
+    return filtered
+
+def wavelet_soft(data, cutoff, fs, order=5):
+    # definir filtros
+
+    # passa altas
+    Hb, Ha = butter_lowpass(cutoff, fs, order=order, ftype='high')
+    # passa baixas
+    Lb, La = butter_lowpass(cutoff, fs, order=order, ftype='low')
+
+    scale = 0
+    iterate = True
+
+    H = filtfilt(Hb, Ha, data)
+    L = filtfilt(Lb, La, data)
+
+    filtered = [None] * len(H)
+
+    for i in range(len(H)):
+        if H[i] <= np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100:
+            filtered[i] = H[i] - np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100
+        else:
+            filtered[i] = H[i]
+
+    while iterate:
+        padlen = 6 * max(len(Ha), len(Hb), len(La), len(Lb))
+        if len(L) <= padlen:
+            return filtered
+
+        H = filtfilt(Hb, Ha, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
+        L = filtfilt(Lb, La, np.delete(L, np.s_[::2], 0), padlen=padlen/2)
+        for i in range(len(H)):
+            if H[i] <= np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100:
+                H[i] = H[i] - np.sqrt(2 * np.log(len(H)) * np.std(H)) * 100
         scale = scale + 2
         for i in range(len(H)):
             if (i%scale == 0):

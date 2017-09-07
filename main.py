@@ -3,8 +3,9 @@ from scikits.audiolab import wavwrite
 from matplotlib import pyplot as plt
 from numpy import fft
 
+
 def main():
-    originalArray, noisyArray, fs = fn.noisemixer(10)
+    originalArray, noisyArray, fs = fn.noisemixer(-10)
     print 'snr original: ' + str(fn.snrcalculation(originalArray, noisyArray)) + ' Db'
 
     order = 5
@@ -20,6 +21,7 @@ def main():
     print 'wavelet_hard filtered data snr: ' + str(fn.snrcalculation(originalArray, originalArray - wv_filtered))
     wavwrite(wv_filtered, 'wavelet_hard.wav', fs)
 
+    '''
     plt.figure(0)
     plt.plot(abs(fft.fft(originalArray + noisyArray)))
 
@@ -29,10 +31,7 @@ def main():
     plt.figure(2)
     plt.plot(abs(fft.fft(btt_filtered)))
 
-    plt.figure(3)
-    plt.plot(abs(fft.fft(originalArray)))
     plt.show()
-
-
+    '''
 if __name__ == '__main__':
     main()
